@@ -1,8 +1,9 @@
 import React from "react"
 import PropTypes from "prop-types"
 // import 'bootstrap/dist/css/bootstrap.min.css';
+import './NflRushing.css';
 
-import { Button, Container, Table } from 'react-bootstrap';
+import { Button, Container, Modal, Table } from 'react-bootstrap';
 
 class NflRushing extends React.Component {
   constructor(props) {
@@ -12,6 +13,7 @@ class NflRushing extends React.Component {
       sortColumn: "Player",
       sortDescending: true,
       nameFilterArray: [],
+      showPlayerSelectModal: false,
     }
     this.attOrderArray = ["Player", "Team", "Pos", "Att_per_game", "Att", "Yds", "Avg", "Yds_per_game", "TD", "Lng", "Lng_with_touchdown", "First", "First_percentage", "Twenty_plus", "Forty_plus", "FUM"];
     this.keyVar = 0;
@@ -84,7 +86,10 @@ class NflRushing extends React.Component {
   }
 
   getDataBody = () => {
-    return this.state.dataArray.map( dataRow => <tr key={ this.getKey() }>{ this.getDataRow( dataRow ) }</tr> )
+    const { nameFilterArray, dataArray } = this.state;
+    if ( nameFilterArray.length === 0 ) return dataArray.map( dataRow => <tr key={ this.getKey() }>{ this.getDataRow( dataRow ) }</tr> );
+    const filteredDataArray = dataArray.filter( e => nameFilterArray.includes( e.Player ));
+    return filteredDataArray.map( dataRow => <tr key={ this.getKey() }>{ this.getDataRow( dataRow ) }</tr> );
   }
 
   handleTitleClick = (attName) => {
@@ -104,10 +109,39 @@ class NflRushing extends React.Component {
     this.setState({ dataArray: newDataArray, sortColumn: attName, sortDescending });
   }
 
+  getPlayerSelectButtons = () => {
+    let displayArray = [];
+    for (let index = 0; index < this.state.dataArray.length; index++) {
+      const name = this.state.dataArray[index]["Player"];
+      const variant = this.state.nameFilterArray.includes(name) ? "success" : "light";
+      displayArray.push(<Button key={name} className="filter-btn" variant={variant} onClick={ () => this.handleNameFilterClick(name) }>{name}</Button>)
+    }
+    return (
+      <div className="filter-btn-container">
+        {displayArray}
+      </div>
+    )
+  }
+
+  handleNameFilterClick = (name) => {
+    const { nameFilterArray } = this.state;
+    if ( nameFilterArray.includes(name)) {
+      this.setState({ nameFilterArray: nameFilterArray.filter( e => e !== name ) })
+    } else {
+      let newArray = nameFilterArray.slice();
+      newArray.push(name);
+      console.log(newArray);
+      this.setState({ nameFilterArray: newArray })
+    }
+  }
 
   render () {
     return (
       <React.Fragment>
+        <Container className="centered-row top-row" fluid>
+          <Button variant="light" onClick={ () => this.setState({ showPlayerSelectModal: true })} >Select Players to Filter Chart</Button>
+          <Button variant="light" onClick={ () => this.setState({ nameFilterArray: [] })} >Clear Filter</Button>
+        </Container>
         <Container fluid>
           <Table striped bordered hover variant="dark">
             <thead>
@@ -116,6 +150,21 @@ class NflRushing extends React.Component {
             <tbody>{ this.getDataBody() }</tbody>
           </Table>
         </Container>
+
+        <Modal
+          size="lg"
+          show={this.state.showPlayerSelectModal}
+          onHide={() => this.setState({ showPlayerSelectModal: false })}
+          aria-labelledby="example-modal-sizes-title-lg"
+        >
+          <Modal.Header closeButton>
+            <Modal.Title className="centered-row">
+              Select Players to include in filtered view
+            </Modal.Title>
+          </Modal.Header>
+          <Modal.Body>{ this.getPlayerSelectButtons() }</Modal.Body>
+        </Modal>    
+
       </React.Fragment>
     );
   }
