@@ -2,7 +2,7 @@ import React from "react"
 import PropTypes from "prop-types"
 // import 'bootstrap/dist/css/bootstrap.min.css';
 
-import { Container, Table } from 'react-bootstrap';
+import { Button, Container, Table } from 'react-bootstrap';
 
 class NflRushing extends React.Component {
   constructor(props) {
@@ -10,6 +10,7 @@ class NflRushing extends React.Component {
     this.state = {
       dataArray: [],
       sortColumn: "Player",
+      sortDescending: true,
       nameFilterArray: [],
     }
     this.attOrderArray = ["Player", "Team", "Pos", "Att_per_game", "Att", "Yds", "Avg", "Yds_per_game", "TD", "Lng", "Lng_with_touchdown", "First", "First_percentage", "Twenty_plus", "Forty_plus", "FUM"];
@@ -62,18 +63,47 @@ class NflRushing extends React.Component {
   }
 
   getHeaderRow = () => {
-    return this.attOrderArray.map( attName => <th key={ this.attOrderArray.indexOf(attName)}>{ this.getLabel( attName )}</th> )
+    let displayArray = [];
+    for (let index = 0; index < this.attOrderArray.length; index++) {
+      const attName = this.attOrderArray[index];
+      let title = null;
+      if ( ["Player","Yds","Lng","TD"].includes(attName)) {
+        const variant = attName === this.state.sortColumn ? "success" : "info";
+        title = <Button variant={variant} data={attName} onClick={() => this.handleTitleClick(attName)} >{ this.getLabel( attName ) }</Button>
+      } else {
+        title = this.getLabel( attName )
+      }
+      displayArray.push( <th key={ this.getKey() }>{ title }</th> )
+    }
+    return displayArray
   }
 
   getDataRow = (dataRow) => {
     const dataRowArray = Object.values(dataRow).slice(1, this.attOrderArray.length + 1);
-    console.log(dataRowArray)
     return dataRowArray.map( dataPoint => <td key={ this.getKey() }>{ dataPoint === true ? "Yes" : dataPoint }</td> );
   }
 
   getDataBody = () => {
     return this.state.dataArray.map( dataRow => <tr key={ this.getKey() }>{ this.getDataRow( dataRow ) }</tr> )
   }
+
+  handleTitleClick = (attName) => {
+    let sortDescending = true;
+    if ( attName === this.state.sortColumn ) {
+      sortDescending = !this.state.sortDescending;
+    } else if ( attName === "Player" ) {
+      sortDescending = false
+    }
+
+    let newDataArray = [];
+    if ( sortDescending ) {
+      newDataArray = this.state.dataArray.sort( (a,b) => a[attName] < b[attName] ? 1 : -1 );
+    } else {
+      newDataArray = this.state.dataArray.sort( (a,b) => a[attName] > b[attName] ? 1 : -1 );
+    }
+    this.setState({ dataArray: newDataArray, sortColumn: attName, sortDescending });
+  }
+
 
   render () {
     return (
