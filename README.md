@@ -54,4 +54,6 @@ We will evaluate you on your ability to solve the problem defined in the require
 If you have any questions regarding requirements, do not hesitate to email your contact at theScore for clarification.
 
 ### Installation and running this solution
-... TODO
+- Install Ruby 3.1.0p0 (2021-12-25 revision fb4df44d16)
+- Install Rails 6.1.4.4
+- Clone repository at https://github.com/joffet/nfl-rushing.git

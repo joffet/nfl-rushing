@@ -21,7 +21,6 @@ class NflRushing extends React.Component {
   }
 
   componentDidMount = () => {
-    console.log(this.props.totalRecordCount);
     this.setState({ 
       dataArray: this.props.dataObject.dataArray, 
       totalServerRecordCount: this.props.dataObject.totalRecordCount 
@@ -150,7 +149,7 @@ class NflRushing extends React.Component {
     const { dataArray } = this.state;
     const lastRecord = dataArray.sort( (a,b) => a["updated_at"] > b["updated_at"] ? 1 : -1 )[0];
 		const body = JSON.stringify({ lastRecordId: lastRecord.id });
-    console.log(body);
+
 		return fetch('/api/', { method: 'POST', headers: { Accept: 'application/json', 'Content-Type': 'application/json', }, body })
 
 		.then( response => {
@@ -176,7 +175,7 @@ class NflRushing extends React.Component {
           <Button variant="light" disabled={true} >Players Loaded {this.state.dataArray.length}</Button>
           { remainingRecords > 0 && <Button variant="light" onClick={ this.handleLoadMoreRecordsClick } >Load Next {remainingRecords} Records</Button> }
           { remainingRecords === 0 && <Button variant="light" disabled={true} >No More Records To Load</Button> }
-          <Button variant="light" onClick={ () => this.setState({ showPlayerSelectModal: true })} >Select Players to Filter Chart</Button>
+          <Button variant="light" onClick={ () => this.setState({ showPlayerSelectModal: true })} >Select Players to Filter</Button>
           <Button variant="light" onClick={ () => this.setState({ nameFilterArray: [] })} >Clear Filter</Button>
           <CSVLink
             data={this.getDownloadData()}
