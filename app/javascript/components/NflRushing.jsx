@@ -1,7 +1,7 @@
 import React from "react"
 import PropTypes from "prop-types"
-// import 'bootstrap/dist/css/bootstrap.min.css';
 import './NflRushing.css';
+import { CSVLink, CSVDownload } from "react-csv";
 
 import { Button, Container, Modal, Table } from 'react-bootstrap';
 
@@ -135,6 +135,12 @@ class NflRushing extends React.Component {
     }
   }
 
+  getDownloadData = () => {
+    const { nameFilterArray, dataArray } = this.state;
+    if ( nameFilterArray.length === 0 ) return dataArray;
+    return dataArray.filter( e => nameFilterArray.includes( e.Player ));
+  }
+
   render () {
     return (
       <React.Fragment>
@@ -143,6 +149,14 @@ class NflRushing extends React.Component {
           <Button variant="light" disabled={true} >Players Loaded {this.state.dataArray.length}</Button>
           <Button variant="light" onClick={ () => this.setState({ showPlayerSelectModal: true })} >Select Players to Filter Chart</Button>
           <Button variant="light" onClick={ () => this.setState({ nameFilterArray: [] })} >Clear Filter</Button>
+          <CSVLink
+            data={this.getDownloadData()}
+            filename={"nfl-rushing.csv"}
+            className="btn btn-primary"
+            target="_blank"
+          >
+            Download Current Data
+          </CSVLink>;
         </Container>
         <Container fluid>
           <Table striped bordered hover variant="dark">
