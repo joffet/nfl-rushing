@@ -56,4 +56,12 @@ If you have any questions regarding requirements, do not hesitate to email your 
 ### Installation and running this solution
 - Install Ruby 3.1.0p0 (2021-12-25 revision fb4df44d16)
 - Install Rails 6.1.4.4
-- Clone repository at https://github.com/joffet/nfl-rushing.git
+(run the following commands in a terminal)
+- git clone https://github.com/joffet/nfl-rushing.git
+- cd nfl-rushing
+- bundle install
+- yarn install
+- rake db:migrate db:seed
+- rails s
+
+- in a browser, go to http://localhost:3000/
