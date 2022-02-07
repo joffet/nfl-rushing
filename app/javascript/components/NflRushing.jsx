@@ -12,7 +12,7 @@ class NflRushing extends React.Component {
       sortColumn: "Player",
       nameFilterArray: [],
     }
-    this.attOrderArray = ["Player", "Team", "Pos", "Att_per_game", "Att", "Yds", "Avg", "Yds_per_game", "TD", "Lng", "First", "First_percentage", "Twenty_plus", "Forty_plus", "FUM"];
+    this.attOrderArray = ["Player", "Team", "Pos", "Att_per_game", "Att", "Yds", "Avg", "Yds_per_game", "TD", "Lng", "Lng_with_touchdown", "First", "First_percentage", "Twenty_plus", "Forty_plus", "FUM"];
     this.keyVar = 0;
   }
 
@@ -43,7 +43,9 @@ class NflRushing extends React.Component {
       case "TD":
         return "Total Rushing Touchdowns"; break;
       case "Lng":
-        return "Longest Rush -- a `T` represents a touchdown occurred"; break;
+        return "Longest Rush"; break;
+      case "Lng_with_touchdown":
+        return "Longest Rush included a touchdown"; break;
       case "First":
         return "Rushing First Downs"; break;
       case "First_percentage":
@@ -65,7 +67,8 @@ class NflRushing extends React.Component {
 
   getDataRow = (dataRow) => {
     const dataRowArray = Object.values(dataRow).slice(1, this.attOrderArray.length + 1);
-    return dataRowArray.map( dataPoint => <td key={ this.getKey() }>{ dataPoint }</td> );
+    console.log(dataRowArray)
+    return dataRowArray.map( dataPoint => <td key={ this.getKey() }>{ dataPoint === true ? "Yes" : dataPoint }</td> );
   }
 
   getDataBody = () => {

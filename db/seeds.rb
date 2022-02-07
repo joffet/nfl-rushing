@@ -15,7 +15,12 @@ records.each do |json_hash|
         new_key["1st"] = "First" if new_key.include? "1st"
         new_key["20+"] = "Twenty_plus" if new_key.include? "20+"
         new_key["40+"] = "Forty_plus" if new_key.include? "40+"
-        formatted_hash[new_key] = value
+        if key === "Lng" && value.class == String
+            formatted_hash["Lng"] = value.dup.delete("T").to_i
+            formatted_hash["Lng_with_touchdown"] = true if value.include? "T"
+        else
+            formatted_hash[new_key] = value
+        end
     end
     PlayerRushing.create!(formatted_hash)
 end
