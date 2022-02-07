@@ -10,17 +10,22 @@ class NflRushing extends React.Component {
     super(props);
     this.state = {
       dataArray: [],
-      sortColumn: "Player",
-      sortDescending: true,
+      sortAttName: "",
+      isSortDescending: true,
       nameFilterArray: [],
       showPlayerSelectModal: false,
+      totalServerRecordCount: 0
     }
     this.attOrderArray = ["Player", "Team", "Pos", "Att_per_game", "Att", "Yds", "Avg", "Yds_per_game", "TD", "Lng", "Lng_with_touchdown", "First", "First_percentage", "Twenty_plus", "Forty_plus", "FUM"];
     this.keyVar = 0;
   }
 
   componentDidMount = () => {
-    this.setState({ dataArray: this.props.dataObject.dataArray })
+    console.log(this.props.totalRecordCount);
+    this.setState({ 
+      dataArray: this.props.dataObject.dataArray, 
+      totalServerRecordCount: this.props.dataObject.totalRecordCount 
+    })
   }
   
   getKey = () => { this.keyVar ++; return this.keyVar }
@@ -70,7 +75,7 @@ class NflRushing extends React.Component {
       const attName = this.attOrderArray[index];
       let title = null;
       if ( ["Player","Yds","Lng","TD"].includes(attName)) {
-        const variant = attName === this.state.sortColumn ? "success" : "info";
+        const variant = attName === this.state.sortAttName ? "success" : "info";
         title = <Button variant={variant} data={attName} onClick={() => this.handleTitleClick(attName)} >{ this.getLabel( attName ) }</Button>
       } else {
         title = this.getLabel( attName )
@@ -93,20 +98,20 @@ class NflRushing extends React.Component {
   }
 
   handleTitleClick = (attName) => {
-    let sortDescending = true;
-    if ( attName === this.state.sortColumn ) {
-      sortDescending = !this.state.sortDescending;
+    let isSortDescending = true;
+    if ( attName === this.state.sortAttName ) {
+      isSortDescending = !this.state.isSortDescending;
     } else if ( attName === "Player" ) {
-      sortDescending = false
+      isSortDescending = false
     }
 
     let newDataArray = [];
-    if ( sortDescending ) {
+    if ( isSortDescending ) {
       newDataArray = this.state.dataArray.sort( (a,b) => a[attName] < b[attName] ? 1 : -1 );
     } else {
       newDataArray = this.state.dataArray.sort( (a,b) => a[attName] > b[attName] ? 1 : -1 );
     }
-    this.setState({ dataArray: newDataArray, sortColumn: attName, sortDescending });
+    this.setState({ dataArray: newDataArray, sortAttName: attName, isSortDescending });
   }
 
   getPlayerSelectButtons = () => {
@@ -141,12 +146,36 @@ class NflRushing extends React.Component {
     return dataArray.filter( e => nameFilterArray.includes( e.Player ));
   }
 
+  handleLoadMoreRecordsClick = () => {
+    const { dataArray } = this.state;
+    const lastRecord = dataArray.sort( (a,b) => a["updated_at"] > b["updated_at"] ? 1 : -1 )[0];
+		const body = JSON.stringify({ lastRecordId: lastRecord.id });
+    console.log(body);
+		return fetch('/api/', { method: 'POST', headers: { Accept: 'application/json', 'Content-Type': 'application/json', }, body })
+
+		.then( response => {
+			response.json().then( data => {
+        this.setState({ dataArray: dataArray.concat(data.nextRecords), sortAttName: "" });
+			})
+		})
+
+    .catch((error) => {
+      console.log(error)
+    });
+
+	}
+
   render () {
+    let remainingRecords = this.state.totalServerRecordCount - this.state.dataArray.length;
+    if ( remainingRecords > 300 ) remainingRecords = 300;
+
     return (
       <React.Fragment>
         <Container className="centered-row top-row" fluid>
           <Button variant="warning" disabled={true} >NFL Rushing App by Jason Offet</Button>
           <Button variant="light" disabled={true} >Players Loaded {this.state.dataArray.length}</Button>
+          { remainingRecords > 0 && <Button variant="light" onClick={ this.handleLoadMoreRecordsClick } >Load Next {remainingRecords} Records</Button> }
+          { remainingRecords === 0 && <Button variant="light" disabled={true} >No More Records To Load</Button> }
           <Button variant="light" onClick={ () => this.setState({ showPlayerSelectModal: true })} >Select Players to Filter Chart</Button>
           <Button variant="light" onClick={ () => this.setState({ nameFilterArray: [] })} >Clear Filter</Button>
           <CSVLink
@@ -187,6 +216,6 @@ class NflRushing extends React.Component {
 }
 
 NflRushing.propTypes = {
-  dataObject: PropTypes.object
+  dataObject: PropTypes.object,
 };
 export default NflRushing
