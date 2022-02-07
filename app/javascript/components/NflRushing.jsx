@@ -139,6 +139,8 @@ class NflRushing extends React.Component {
     return (
       <React.Fragment>
         <Container className="centered-row top-row" fluid>
+          <Button variant="warning" disabled={true} >NFL Rushing App by Jason Offet</Button>
+          <Button variant="light" disabled={true} >Players Loaded {this.state.dataArray.length}</Button>
           <Button variant="light" onClick={ () => this.setState({ showPlayerSelectModal: true })} >Select Players to Filter Chart</Button>
           <Button variant="light" onClick={ () => this.setState({ nameFilterArray: [] })} >Clear Filter</Button>
         </Container>
